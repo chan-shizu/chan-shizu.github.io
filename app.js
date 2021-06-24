@@ -11,10 +11,11 @@ background.src = "images/rikadai.jpg";
     //canvas_widthを height / width倍する.
 //ctx.drawImage(background,0,0,c.width, background.height * c.width / background.width);
 //}
+var checker = 0;
 
 var size = 15;
 
-let imgName = ['images/1.png', 'images/2.png'];
+let imgSize = [150, 100, 70, 70, 100, 150, 300, 150, 100, 300, 150, 300, 200];
 
 document.body.appendChild(c);
 
@@ -81,10 +82,10 @@ var player = new function() {
         if(p1 - size*2 < this.y  && playing) {
             this.ySpeed = -k.v*7;
         }
-        
-        this.rSpeed += (k.ArrowLeft - k.ArrowRight) * 0.05;
+       
+        this.rSpeed += (k.ArrowUp - k.ArrowDown) * 0.05;
         if (grounded) {
-            this.x += (k.ArrowUp - k.ArrowDown) * 7;
+            this.x += (k.ArrowRight - k.ArrowLeft) * 7;
             //this.y = p1 - size;
             this.y = c.height - noise(t + this.x) * 0.25 - size*0.9;
         }
@@ -107,10 +108,13 @@ var enemy = new function() {
     this.y = 0;
     this.ySpeed = 0;
 
+    var a = Math.floor( Math.random()*13);
+    this.size = imgSize[a];
+
     this.img = new Image();
-    var a = Math.floor( Math.random());
     //this.img.src = "images/1.png"
-    this.img.src = imgName[a];
+    //this.img.src = imgName[a];
+    this.img.src = "images/" + (a+1) + ".png";
 
     this.draw = function() {
         var p1 = c.height - noise(t + this.x) * 0.25;
@@ -133,15 +137,17 @@ var enemy = new function() {
         if (grounded) {
             this.y = 0;
             this.x = Math.random() * c.width;
-            a = Math.floor( Math.random()*2);
-            this.img.src = imgName[a];
+            a = Math.floor( Math.random()*13);
+            //this.img.src = imgName[a];
+            this.img.src = "images/" + (a+1) + ".png";
+            this.size = imgSize[a];
             console.log(a)
         }
 
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rot);
-        ctx.drawImage(this.img, -15, -15, 100, 30);
+        ctx.drawImage(this.img, -15, -15, this.size, this.size*30/100);
 
         ctx.restore();
     }
@@ -164,8 +170,8 @@ var text;
     });*/
 function detectTouch(first, second) {
 
-    var objSize = 50;
-    if((second.x < first.x + objSize && first.x - objSize < second.x) && (first.y < second.y)) {
+    var objSize = second.size;
+    if((second.x < first.x && first.x - objSize < second.x) && (first.y < second.y)) {
         playing = false;
         //console.log("x : " + first.x + " y : " + first.y + "\n");
         //console.log("x : " + second.x + " y : " + second.y + "\n");
@@ -174,7 +180,6 @@ function detectTouch(first, second) {
 }
 
 function loop() {
-
     //speedDiff -= (speedDiff - (k.ArrowUp - k.ArrowDown)) * 0.1;
     //speed = defaultSpeed + speedDiff;
     speed = defaultSpeed;
@@ -238,6 +243,13 @@ function loop() {
         } else {
             var comment2 = "<div>すげえ!!</div>"
         }
+
+        var tweet = document.getElementById('tweet');
+        var tweetUrl = 'https://twitter.com/intent/tweet?text='+
+        encodeURIComponent(
+        '私の記録は' + distance + 'でした'
+        ) + '&hashtags=シズゲー';
+        tweet.href = tweetUrl;
         
         close.insertAdjacentHTML('beforebegin', comment);
         close.insertAdjacentHTML('beforebegin', comment2);
@@ -248,14 +260,33 @@ function loop() {
     }
 }
 
-onkeydown = d => k[d.key] = 1;
-onkeyup = d => k[d.key] = 0;
+function begin() {
+    const begin_open = document.getElementById('begin_open');
+    const begin_close = document.getElementById('begin_close');
+    const begin_modal = document.getElementById('begin_modal');
+    const begin_mask = document.getElementById('begin_mask');
 
-loop();
+    //begin_modal.classList.remove('hidden');
+    //begin_mask.classList.remove('hidden');
+
+    begin_close.addEventListener('click',()=>{
+        begin_modal.setAttribute("class", "hidden");
+        begin_mask.setAttribute("class", "hidden");
+        //console.log(checker);
+        loop();
+    });
+}
 
 //結果をツイート機能
-var tweet = document.getElementById('tweet');
+/*var tweet = document.getElementById('tweet');
 var tweetUrl = 'https://twitter.com/intent/tweet?text='+
   encodeURIComponent(
     '記録は' + distance + 'でした'
-  ) + '&hashtags = シズゲー';
+  ) + '&hashtags = シズゲー';*/
+begin();
+
+onkeydown = d => k[d.key] = 1;
+onkeyup = d => k[d.key] = 0;
+
+//checker = 1;
+//loop();
